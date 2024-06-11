@@ -2,13 +2,13 @@ import serial
 import os
 
 # Настройки порта и скорости
-PORT = '/dev/ttyUSB0'  # Замените на ваш порт
+PORT = '/dev/ttyUSB0'  #канал (задать)
 BAUDRATE = 9600  # Скорость передачи данных
 
 # Создание объекта для работы с портом
 ser = serial.Serial(PORT, BAUDRATE, timeout=1)
 
-# Функция для формирования бита контроля четности
+# для формирования бита контроля четности
 def crc7(data):
     crc = 0
     for byte in data:
@@ -24,12 +24,12 @@ def send_command(command):
     # Формирование битов команды
     bits = [0, 0, 0, 0, 0, 0, 0]  # Инициализируем массив битов команды
     bits[0] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[1] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[2] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[3] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[4] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[5] = 1 if command == 'play' else 0  # Включение/выключение
-    bits[6] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[1] = 1 if command == 'play' else 0  
+    bits[2] = 1 if command == 'play' else 0  
+    bits[3] = 1 if command == 'play' else 0  
+    bits[4] = 1 if command == 'play' else 0  
+    bits[5] = 1 if command == 'play' else 0  
+    bits[6] = 1 if command == 'play' else 0  
 
     # Формирование бита контроля четности
     crc = crc7(bits)
