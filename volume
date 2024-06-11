@@ -1,0 +1,65 @@
+import serial
+import os
+
+# Настройки порта и скорости
+PORT = '/dev/ttyUSB0' 
+BAUDRATE = 9600  
+
+# Создание объекта для работы с портом
+ser = serial.Serial(PORT, BAUDRATE, timeout=1)
+
+# Функция для формирования бита контроля четности
+def crc7(data):
+    crc = 0
+    for byte in data:
+        crc ^= byte
+        for bit in range(8):
+            crc <<= 1
+            if crc & 0x100:
+                crc ^= 0x85
+    return crc & 0x7F
+
+# Функция для отправки команды
+def send_command(volume):
+    # Формирование битов команды
+    bits = [0, 0, 0, 0, 0]  # Инициализируем массив битов команды
+    bits[0] = 1 if volume > 0 else 0  # Уровень громкости
+    bits[1] = 1 if volume > 1 else 0
+    bits[2] = 1 if volume > 2 else 0
+    bits[3] = 1 if volume > 3 else 0
+    bits[4] = 1 if volume > 4 else 0
+    bits[5] = 1 if volume > 5 else 0
+    bits[6] = 1 if volume > 6 else 0
+    bits[7] = 1 if volume > 7 else 0
+
+    # Формирование бита контроля четности
+    crc = crc7(bits)
+
+    # Сборка и отправка команды
+    command_bits = bits + [crc]
+    command_bytes = bytes(command_bits)
+    ser.write(command_bytes)
+
+# Функция для изменения громкости 
+def change_volume(direction):
+    global volume
+    if direction == '+':
+        volume = min(31, volume + 1)  # Увеличение на 1% до 100%
+    elif direction == '-':
+        volume = max(0, volume - 1)  # Уменьшение на 1% до 0%
+    send_command(volume)
+
+# Дефолтное значение громкости
+volume = 0
+
+# Пример использования функций
+send_command(0)  # Установка дефолтной громкости 0%
+
+# Увеличение громкости на 1%
+change_volume('+')
+
+# Уменьшение громкости на 1%
+change_volume('-')
+
+# Установка громкости на 50%
+send_command(15)
