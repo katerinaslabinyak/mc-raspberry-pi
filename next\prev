@@ -1,0 +1,49 @@
+import RPi.GPIO as GPIO
+import serial
+
+# Настройки GPIO
+BUTTON_PREV_PIN = 17  # Пин кнопки "Предыдущий трек"
+BUTTON_NEXT_PIN = 18  # Пин кнопки "Следующий трек"
+
+# Настройки команд RS-232
+COMMAND_PREV_TRACK = 'prev_track'
+COMMAND_NEXT_TRACK = 'next_track'
+
+# Инициализация серийного порта RS-232
+ser = serial.Serial('/dev/ttyUSB0', 9600)  # Укажите соответствующий COM порт и скорость передачи данных RS-232
+
+def switch_audio_source(source):
+    commands = {
+        'prev_track': '01',
+        'next_track': '02'
+    }
+
+    if source in commands:
+        command = commands[source]
+        ser.write(command.encode())  # Отправка команды на устройство по RS-232
+
+def prev_track_callback(channel):
+    switch_audio_source(COMMAND_PREV_TRACK)
+
+def next_track_callback(channel):
+    switch_audio_source(COMMAND_NEXT_TRACK)
+
+def setup_gpio():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(BUTTON_PREV_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Настройка пина на вход с подтяжкой к питанию
+    GPIO.setup(BUTTON_NEXT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    GPIO.add_event_detect(BUTTON_PREV_PIN, GPIO.FALLING, callback=prev_track_callback, bouncetime=200)  # Отслеживание нажатий кнопки с обработчиком
+    GPIO.add_event_detect(BUTTON_NEXT_PIN, GPIO.FALLING, callback=next_track_callback, bouncetime=200)
+
+if __name__ == '__main__':
+    setup_gpio()
+
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        print("Выход")
+    finally:
+        GPIO.cleanup()
+        ser.close()
