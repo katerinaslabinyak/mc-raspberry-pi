@@ -1,0 +1,48 @@
+import serial
+
+def switch_audio_source(source):
+    commands = {
+        'USB Mass Storage': '01',
+        'USB Audio': '02',
+        'Line in': '03',
+        'Bluetooth A2DP': '04',
+        'WiFi': '05'
+    }
+
+    if source in commands:
+        command = commands[source]
+        ser = serial.Serial('/dev/ttyUSB0', 9600)  # Укажите соответствующий COM порт и скорость передачи данных RS-232
+        ser.write(command.encode())  # Отправка команды на устройство по RS-232
+        ser.close()
+        print(f"Отправлена команда переключения на источник {source}: {command}")
+    else:
+        print("Некорректный источник звука")
+
+# Обработчики для каждого источника звука
+def switch_to_usb_mass_storage():
+    switch_audio_source('USB Mass Storage')
+
+def switch_to_usb_audio():
+    switch_audio_source('USB Audio')
+
+def switch_to_line_in():
+    switch_audio_source('Line in')
+
+def switch_to_bluetooth_a2dp():
+    switch_audio_source('Bluetooth A2DP')
+
+def switch_to_wifi():
+    switch_audio_source('WiFi')
+
+# Пример использования
+received_command = '01'  # Пример полученной команды по RS-232
+if received_command == '01':
+    switch_to_usb_mass_storage()
+elif received_command == '02':
+    switch_to_usb_audio()
+elif received_command == '03':
+    switch_to_line_in()
+elif received_command == '04':
+    switch_to_bluetooth_a2dp()
+elif received_command == '05':
+    switch_to_wifi()
