@@ -1,0 +1,46 @@
+import serial
+import os
+
+# Настройки порта и скорости
+PORT = '/dev/ttyUSB0'  # Замените на ваш порт
+BAUDRATE = 9600  # Скорость передачи данных
+
+# Создание объекта для работы с портом
+ser = serial.Serial(PORT, BAUDRATE, timeout=1)
+
+# Функция для формирования бита контроля четности
+def crc7(data):
+    crc = 0
+    for byte in data:
+        crc ^= byte
+        for bit in range(8):
+            crc <<= 1
+            if crc & 0x100:
+                crc ^= 0x85
+    return crc & 0x7F
+
+# Функция для отправки команды
+def send_command(command):
+    # Формирование битов команды
+    bits = [0, 0, 0, 0, 0, 0, 0]  # Инициализируем массив битов команды
+    bits[0] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[1] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[2] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[3] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[4] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[5] = 1 if command == 'play' else 0  # Включение/выключение
+    bits[6] = 1 if command == 'play' else 0  # Включение/выключение
+
+    # Формирование бита контроля четности
+    crc = crc7(bits)
+
+    # Сборка и отправка команды
+    command_bits = bits + [crc]
+    command_bytes = bytes(command_bits)
+    ser.write(command_bytes)
+
+# Пример использования функции
+send_command('play')  # Включение музыки
+send_command('pause')  # Пауза
+send_command('play')  # Возобновление воспроизведения
+send_command('stop')  # Остановка воспроизведения
